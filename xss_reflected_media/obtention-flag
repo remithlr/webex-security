@@ -1,1 +1,33 @@
+## Exploitation de la vulnérabilité : XSS réfléchie via data URI
+
+Lors de l’analyse de l’application, une fonctionnalité permettant d’afficher un
+contenu média à partir d’un paramètre utilisateur présente un comportement
+vulnérable. Ce paramètre est directement utilisé pour définir la source d’un
+contenu chargé côté client.
+
+L’analyse du fonctionnement de la page montre que la valeur fournie par
+l’utilisateur est réinjectée dans l’attribut `data` d’une balise HTML de type
+`object`, sans validation du schéma d’URL utilisé. Bien que les caractères HTML
+soient encodés côté serveur, aucun filtrage n’est appliqué sur les URI fournies.
+
+Les tentatives d’injection XSS classiques échouent en raison de l’encodage des
+caractères spéciaux. Cependant, ce mécanisme est insuffisant. En utilisant une
+data URI encodée en base64, il est possible de contourner le filtrage côté
+serveur.
+
+Le navigateur décode ensuite automatiquement le contenu de la data URI et
+l’interprète comme du HTML valide, ce qui entraîne l’exécution de code
+JavaScript arbitraire côté client. L’exploitation permet alors l’affichage du
+flag, confirmant la présence d’une vulnérabilité de type XSS réfléchie.
+
+Cette faille est exploitable sans authentification et peut être utilisée pour
+exécuter du code JavaScript dans le navigateur des utilisateurs, entraînant des
+risques de vol de session, de redirection malveillante ou d’altération de
+l’interface.
+
+Les schémas d’URL dangereux tels que `data:` ou `javascript:` doivent être
+explicitement interdits. Les entrées utilisateur doivent être validées de
+manière stricte à l’aide de listes blanches. L’utilisation de la balise `object`
+pour afficher du contenu dynamique doit être évitée, et une politique de
+sécurité du contenu restrictive doit être mise en place.
 
