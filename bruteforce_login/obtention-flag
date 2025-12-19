@@ -1,1 +1,76 @@
+## Analyse du formulaire de connexion
 
+Aucune information n’est fournie concernant les comptes existants. Dans un premier temps, l’hypothèse la plus courante est retenue : l’existence d’un compte administrateur avec un identifiant standard tel que `admin`.
+
+Un test manuel est effectué avec les identifiants suivants :
+
+- Nom d’utilisateur : `admin`
+- Mot de passe : `test`
+
+La tentative échoue, ce qui confirme que le compte existe probablement mais que le mot de passe est incorrect.
+
+---
+
+## Interception de la requête HTTP
+
+La tentative de connexion est interceptée à l’aide d’un proxy d’interception.  
+La requête HTTP envoyée au serveur est analysée afin d’identifier les paramètres transmis lors de l’authentification.
+
+Le champ `password` est alors identifié comme une cible idéale pour une attaque automatisée. La valeur du mot de passe est marquée afin de pouvoir être remplacée dynamiquement lors des tests.
+
+---
+
+## Mise en place de l’attaque par brute force
+
+La requête interceptée est envoyée vers l’outil d’attaque automatisée.  
+Une wordlist classique présente sur Kali Linux est utilisée pour tester une grande quantité de mots de passe courants.
+
+Exemple de wordlist utilisée :
+
+/usr/share/wordlists/rockyou.txt
+
+
+L’attaque est ensuite lancée en envoyant successivement chaque mot de passe de la liste au serveur.
+
+---
+
+## Identification de la réponse valide
+
+Une fois l’attaque terminée, les réponses HTTP sont analysées.  
+La majorité des tentatives retournent un comportement identique, indiquant un échec d’authentification.
+
+Une réponse se distingue cependant par une taille ou un contenu différent, ce qui suggère une connexion réussie. Cette réponse permet d’identifier le mot de passe valide associé au compte administrateur.
+
+---
+
+## Résultat obtenu
+
+Après exploitation de cette faiblesse, l’application retourne le message de succès suivant, contenant le flag :
+
+b3a6e43ddf8b4bbb4125e5e7d23040433827759d4de1c04ea63907479a80a6b2
+
+
+L’attaque par brute force est donc confirmée comme fonctionnelle sur ce formulaire.
+
+---
+
+## Impact de la vulnérabilité
+
+Cette faille montre que le mécanisme d’authentification ne dispose d’aucune protection contre les tentatives répétées de connexion.  
+Dans un contexte réel, cela pourrait permettre :
+
+- La compromission de comptes sensibles
+- Un accès administrateur non autorisé
+- Une compromission complète de l’application
+
+---
+
+## Mesures correctives recommandées
+
+Pour limiter ce type d’attaque, plusieurs protections devraient être mises en place :
+
+- Implémenter un mécanisme de limitation du nombre de tentatives
+- Mettre en place un délai progressif après plusieurs échecs
+- Bloquer temporairement un compte après un certain nombre d’essais
+- Ajouter un CAPTCHA après plusieurs tentatives infructueuses
+- Journaliser et surveiller les tentatives de connexion anormales
