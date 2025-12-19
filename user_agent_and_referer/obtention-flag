@@ -1,1 +1,23 @@
+## Exploitation de la vulnérabilité : confiance excessive dans les en-têtes HTTP
+
+Lors de l’analyse de l’application, une page accessible via un paramètre `page`
+présente un comportement inhabituel. L’accès direct à cette page ne permet pas
+d’afficher le flag.
+
+L’analyse du code source HTML révèle la présence de commentaires indiquant que
+l’accès dépend de certains en-têtes HTTP, notamment le champ Referer et le
+User-Agent. Ces éléments suggèrent que l’application se base uniquement sur ces
+valeurs pour autoriser l’accès à une fonctionnalité protégée.
+
+En forgeant manuellement une requête HTTP et en définissant un Referer et un
+User-Agent spécifiques, il est possible de contourner ce contrôle. Le serveur
+considère alors la requête comme légitime et retourne le flag.
+
+Cette vulnérabilité démontre une confiance excessive accordée à des en-têtes
+HTTP contrôlables par l’utilisateur.
+
+Les en-têtes HTTP tels que User-Agent ou Referer ne doivent jamais être utilisés
+comme mécanisme de contrôle d’accès. Une authentification robuste basée sur des
+sessions ou des jetons côté serveur doit être mise en place. Les informations
+sensibles ne doivent pas être exposées dans les commentaires HTML.
 
