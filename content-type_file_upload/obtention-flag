@@ -1,1 +1,69 @@
+## Analyse initiale de l’upload
 
+L’interface d’upload indique clairement que seuls des fichiers image sont attendus.  
+Un premier test avec un fichier image valide au format `.jpg` confirme que l’envoi fonctionne normalement.
+
+En revanche, toute tentative d’upload d’un fichier PHP est immédiatement refusée, ce qui indique la présence de contrôles côté serveur, probablement basés sur l’extension du fichier, son type MIME ou sa signature.
+
+---
+
+## Tentatives de contournement des filtres
+
+Une première approche consiste à tester une **double extension**.  
+Un fichier PHP est renommé avec une extension `.jpg` afin de se faire passer pour une image.
+
+L’upload de ce fichier est accepté par l’application, ce qui démontre que la validation repose principalement sur l’extension. Toutefois, cette action ne permet pas d’obtenir le flag, car le fichier n’est ni exécuté ni exploité par l’application.
+
+Cela suggère que le simple upload d’un fichier malveillant n’est pas suffisant et qu’un autre paramètre entre en jeu lors du traitement de la requête.
+
+---
+
+## Observation du paramètre de validation
+
+L’analyse du formulaire et des requêtes HTTP montre que le paramètre `Upload` joue un rôle dans la validation de l’envoi.  
+Sa valeur par défaut ne permet pas d’atteindre le comportement attendu.
+
+En forgeant manuellement la requête HTTP, il est possible de modifier ce paramètre afin de forcer le traitement du fichier envoyé.
+
+---
+
+## Exploitation via requête HTTP forgée
+
+Un fichier PHP vide est créé localement, puis envoyé via une requête `curl` construite manuellement.  
+Le type MIME est volontairement défini comme `image/jpeg`, bien que le fichier ne soit pas une image.
+
+La requête POST permet alors de contourner les contrôles mis en place par l’application. Le serveur accepte le fichier, le traite comme valide et retourne immédiatement le message de succès contenant le flag.
+
+---
+
+## Résultat obtenu
+
+L’application affiche le message suivant :
+
+The flag is : 46910d9ce35b385885a9f7e2b336249d622f29b267a1771fbacf52133beddba8
+
+
+Ce comportement confirme une faiblesse dans la gestion des fichiers uploadés.
+
+---
+
+## Impact de la vulnérabilité
+
+Cette faille permet de contourner les mécanismes de validation d’upload et d’envoyer des fichiers arbitraires au serveur.  
+Dans un contexte réel, cela pourrait mener à :
+
+- L’upload de scripts exécutables
+- Une compromission du serveur web
+- Une élévation de privilèges ou une exécution de commandes à distance
+
+---
+
+## Recommandations de sécurité
+
+Pour corriger cette vulnérabilité, plusieurs mesures doivent être mises en place :
+
+- Vérifier le **contenu réel** du fichier (signature magique), et pas uniquement son extension ou son type MIME
+- Ne jamais faire confiance aux paramètres contrôlables par l’utilisateur pour valider une action critique
+- Renommer systématiquement les fichiers uploadés côté serveur
+- Stocker les fichiers envoyés en dehors des répertoires accessibles par le serveur web
+- Restreindre strictement les types de fichiers autorisés via une liste blanche
