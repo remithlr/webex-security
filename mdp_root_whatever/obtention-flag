@@ -1,1 +1,48 @@
+Un hash MD5 correspondant à un mot de passe a été récupéré lors de l’analyse d’un mécanisme d’authentification.
+À partir de ce hash, le mot de passe en clair a pu être retrouvé, mettant en évidence la faiblesse de l’algorithme MD5 lorsqu’il est utilisé pour le stockage des mots de passe.
 
+MD5 étant un algorithme de hachage obsolète et vulnérable, il est sensible aux attaques par dictionnaire, aux bases de hashes connues et aux rainbow tables, rendant le cassage de mots de passe rapide et accessible.
+
+Algorithme de hachage
+
+Ne plus utiliser MD5 ni SHA‑1
+
+Employer des algorithmes adaptés au stockage des mots de passe :
+
+Argon2 (recommandé)
+
+bcrypt
+
+PBKDF2
+
+scrypt
+
+
+Salt
+
+Utiliser un salt unique par utilisateur
+
+Le stocker avec le hash afin de prévenir les attaques par rainbow tables
+
+
+
+
+Politique de mots de passe
+
+Longueur minimale suffisante
+
+Complexité adaptée
+
+Interdiction des mots de passe courants
+
+
+
+
+
+Protection des accès
+
+Limiter le nombre de tentatives de connexion
+
+Mettre en place des délais ou blocages temporaires
+
+Surveiller les tentatives suspectes
