@@ -1,1 +1,25 @@
+## Exploitation de la vulnérabilité : cookie_weak_encryption
+
+Lors de l’analyse de la page d’authentification, un cookie nommé `I_am_admin`
+a été identifié dans le navigateur. Ce cookie semble être utilisé par
+l’application pour déterminer le niveau de privilège de l’utilisateur.
+
+Par défaut, la valeur du cookie correspond au hash MD5 de la chaîne "false",
+ce qui indique un accès utilisateur standard. En comparant cette valeur avec
+le résultat du calcul MD5 côté client, il a été possible de comprendre la
+logique de vérification mise en place par l’application.
+
+En calculant le hash MD5 de la chaîne "true", une valeur correspondant à un
+accès administrateur a été obtenue. La modification manuelle du cookie avec
+cette valeur permet alors de contourner le mécanisme d’authentification.
+
+Après rechargement de la page, l’application considère l’utilisateur comme
+administrateur et affiche le flag, sans qu’aucune authentification valide
+n’ait été réalisée.
+
+Les privilèges ne doivent jamais être stockés ou contrôlés côté client.
+La gestion des rôles doit être effectuée côté serveur à l’aide de sessions
+sécurisées. Les cookies doivent être signés et vérifiés afin d’empêcher toute
+modification manuelle, et l’utilisation d’algorithmes de hachage obsolètes
+comme MD5 doit être évitée.
 
