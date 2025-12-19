@@ -1,1 +1,41 @@
+# Lors de l’analyse de l’application web, un défaut de sécurité a été identifié dans
+la gestion des données issues du formulaire de retour utilisateur. Les informations
+saisies par un visiteur sont enregistrées côté serveur puis réaffichées dans la page,
+sans protection suffisante lors du rendu HTML.
 
+Les premiers tests montrent que l’application tente de bloquer certaines injections
+évidentes. Les balises considérées comme dangereuses, telles que `<script>` ou
+certains éléments multimédias, sont supprimées avant l’affichage. Cette approche
+repose toutefois sur un filtrage partiel et ne prend pas en compte la structure
+complète du document HTML.
+
+En manipulant le contenu injecté, il est possible de rompre le contexte HTML existant
+généré par l’application. Cette technique permet d’introduire un nouvel élément
+interactif contenant un attribut JavaScript autorisé. Le filtrage en place ne
+neutralise pas ce type de construction, ce qui rend l’injection possible malgré les
+protections apparentes.
+
+Le contenu malveillant est stocké par l’application et réaffiché à chaque chargement
+de la page concernée. L’exécution du code JavaScript ne se produit qu’après une action
+de l’utilisateur, comme un clic sur l’élément injecté. Ce comportement confirme la
+présence d’une vulnérabilité de type XSS persistante.
+
+Une fois l’exécution du code validée, l’application affiche un message confirmant la
+réussite de l’exploitation, accompagné du flag suivant :
+
+0fbb54bbf7d099713ca4be297e1bc7da0173d8b3c21c1811b916a3a86652724e
+
+
+Ce type de faille peut avoir des conséquences importantes. Un attaquant pourrait
+exécuter du code JavaScript de manière durable dans le navigateur des utilisateurs,
+accéder à des données de session, détourner l’interface de l’application ou rediriger
+les victimes vers des contenus malveillants.
+
+Afin de corriger ce problème, il est nécessaire de sécuriser systématiquement
+l’affichage des données fournies par les utilisateurs à l’aide d’un encodage adapté
+au contexte HTML. Les mécanismes de filtrage basés sur des listes noires doivent être
+évités au profit d’un encodage strict. Il est également recommandé de restreindre
+l’utilisation des attributs événementiels JavaScript et de mettre en place une
+politique de sécurité du contenu renforcée. Une séparation claire entre les données
+et la logique de présentation permettrait enfin de réduire significativement les
+risques d’exploitation.
